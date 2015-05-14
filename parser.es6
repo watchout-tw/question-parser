@@ -20,6 +20,7 @@ var parser = parse({colums: true, trime: true}, (err, data) => {
     var file = row.shift();
     // if(file === 'LCIDC01_1015401_00004.md') console.log(i);
     var start = parseInt(row.shift(), 10);
+    if(isNaN(start)) return;
     var end = parseInt(row.shift(), 10);
     var content = fs.readFileSync(`./md/${file}`, 'utf8');
     var speaker = '', speech = [], questioner, officials = [], official = null, chairman, temp_chairman, heading, committee, time;
@@ -27,11 +28,12 @@ var parser = parse({colums: true, trime: true}, (err, data) => {
 
     content.split('\n').map((line, index, self)=> {
       var line_no = index + 1, tmp;
-      if( line_no < start  && (tmp = line.match(/立法院第(\d+)屆第(\d+)會期(\W+)委員會第(\d+)次全體委員(會)?會議紀錄/))) {
+      if( line_no < start  && (tmp = line.match(/立法院第(\d+)屆(?:第)?(\d+)會期(?:第.+會)?(\W+)委員會第(\d+)次全體委員(?:會)?會議(?:紀錄)?/))) {
         committee = tmp[3];
         heading = line;
       }
-      if( line_no < start && (tmp = line.match(/時　　間　.*(\d{3})年(\d+)月(\d+)(日)?（\W+）((\W{1})午)?(\d+)時/))) {
+
+      if( line_no < start && (tmp = line.match(/時　　間.*(\d{3})年(\d+)月(\d+)\s*(日)?（\W+）((\W{1})午)?(\d+)\s*時/))) {
         time = {
           year: parseInt(tmp[1]) + 1911,
           month: paddZero(~~tmp[2]),
@@ -49,7 +51,7 @@ var parser = parse({colums: true, trime: true}, (err, data) => {
         // heading =`${time.year}年${time.month}月${time.day}日, ${committee}`;
         // Sections = [{heading }];
       }
-      if(line_no < start && !chairman && (tmp = line.match(/(?:主　　席|主 持 人)　(\W+)/)) && !line.match(/出席委員已足法定人數/)) {
+      if(line_no < start && !chairman && (tmp = line.match(/(?:主\s*席|主 持 人)(?:\s+|：)(\W+)/)) && !line.match(/出席委員已足法定人數/)) {
         chairman = tmp[1];
       }
 
@@ -57,7 +59,7 @@ var parser = parse({colums: true, trime: true}, (err, data) => {
 
       if((tmp = line.match(/(^[^：()1-9※■A-Za-z，、◆─․\-「－●★˙Ｑ]{2,17})：(.+[。？！\.：]$)/))) {
         if(!tmp[1].match(not_name)) {
-          speaker = tmp[1].trim();
+          speaker = tmp[1].trim().replace('繼續開會','');
           speech = [ { p: tmp[2].trim() }];
         } else {
           speech.push({ p: tmp[2].trim()});
@@ -85,7 +87,7 @@ var parser = parse({colums: true, trime: true}, (err, data) => {
           if(official && officials.indexOf(official) === -1) officials.push(official);
 
           // 質詢人交換
-          if(speaker.match(/主席/) && (tmp = line.match(/請(?!兩位).*(.{1}委員(?!(的|可以|會是|登記|非常|不要|，因)).+)(質詢|發言)(。|，)/))) {
+          if(speaker.match(/主席/) && (tmp = line.match(/請(?!兩位).*(.{1}委員(?!的|可以|會是|登記|非常|不要|，因|要|開始|在|繼續).{1,3})(質詢|發言)(。|，)/))) {
               if(debateSection.length > 1 && questioner) {
                 Sections.push({
                   debateSection: [{heading: `${Sections.length + 1}.${questioner.replace('委員','')}質詢${officials.toString()}`}]
