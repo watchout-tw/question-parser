@@ -1,0 +1,13 @@
+{
+  "name": "gazette.api.server",
+  "description": "for gazette annotater",
+  "scripts": {
+    "start": "babel-node index.es6"
+  },
+  "dependencies": {
+    "babel": "^5.2.17",
+    "body-parser": "^1.12.4",
+    "express": "^4.12.3",
+    "redis": "^0.12.1"
+  }
+}
