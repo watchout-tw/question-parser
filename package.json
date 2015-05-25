@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "babel": "^5.1.13",
+    "bluebird": "^2.9.25",
     "csv-parse": "^0.1.1"
   }
 }
