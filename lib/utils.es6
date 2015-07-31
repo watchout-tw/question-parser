@@ -66,6 +66,7 @@ export var correctName = (speaker) => {
   if(speaker.match(/^丁委員手中$/)) speaker = '丁委員守中';
   if(speaker.match(/^周委委員倪安$/)) speaker = '周委員倪安';
   if(speaker.match(/^羅偉委員明才$/)) speaker = '羅委員明才';
+  if(speaker.match(/^丁參謀長武忠/)) speaker = '丁參謀長忠武';
   if(speaker.match(/\uE8DF/)) speaker = speaker.replace(/\uE8DF/,'敘');
   if(speaker.match(/\uE5CF/)) speaker = speaker.replace(/\uE5CF/,'峰');
   if(speaker.match(/\uE093/)) speaker = speaker.replace(/\uE093/,'柏');
